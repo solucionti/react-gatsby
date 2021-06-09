@@ -1,7 +1,31 @@
-/**
- * Implement Gatsby's Node APIs in this file.
- *
- * See: https://www.gatsbyjs.com/docs/node-apis/
- */
+exports.createPages = async ({ actions, graphql, reporter }) => {
+  const resultado = await graphql(`query{
+      pokemons {
+          pokemons(first: 150) {
+              id
+          }
+      }
+  }
+  `)
 
-// You can delete this file if you're not using it
+  //console.log(resultado.data.pokemons.pokemons);
+
+  if (resultado.errors) {
+    reporter.panic("No Hubo resultados", resultado.errors)
+  }
+
+  const pokemones = resultado.data.pokemons.pokemons
+  // console.log(pokemones);
+
+  pokemones.forEach(pokemon => {
+
+    console.log(pokemon);
+    actions.createPage({
+      path: pokemon.id,
+      component: require.resolve("./src/components/pokemon-single.js"),
+      context: {
+        id: pokemon.id
+      }
+    })
+  })
+}
